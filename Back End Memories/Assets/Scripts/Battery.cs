@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class Battery : MonoBehaviour
 {
+<<<<<<< Updated upstream
     float Power; // remaining battery
     int batteryId;
     // Start is called before the first frame update
@@ -24,6 +25,20 @@ public class Battery : MonoBehaviour
             batteries = newb;
         }
         batteries[batteryId] = this;
+=======
+    Battery NextBattery; // possibly use for easier coordinate checks; and also for checking if equipped battery has backup available (failure means game over)
+    float Power; // remaining battery
+    static float DepletionRate; // depletion per tick
+    static float MinimumPower;
+    static float FullPower;
+    static float DamagedChance;
+    // Start is called before the first frame update
+
+    public Battery() : this(UnityEngine.Random.Range(MinimumPower, FullPower)) {}
+    public Battery(float p) {
+        Power = p;
+        
+>>>>>>> Stashed changes
     }
 
     void Start()
@@ -31,7 +46,11 @@ public class Battery : MonoBehaviour
     }
 
     public static Battery getBattery() {
+<<<<<<< Updated upstream
         if (UnityEngine.Random.Range(0f, 1f) < BatteryActions.DamagedChance) return new DamagedBattery();
+=======
+        if (UnityEngine.Random.Range(0f, 1f) < DamagedChance) return new DamagedBattery();
+>>>>>>> Stashed changes
         else return new Battery();
     }
 
@@ -54,6 +73,7 @@ public class Battery : MonoBehaviour
     }
 
     public float Deplete() {
+<<<<<<< Updated upstream
         this.Power -= BatteryActions.DepletionRate;
         return this.Power;
     }
@@ -66,5 +86,13 @@ public class Battery : MonoBehaviour
     {
         if (this.Power <= 0) return null;
         else return this;
+=======
+        this.Power -= DepletionRate;
+        return this.Power;
+    }
+
+    class DamagedBattery : Battery {
+        public DamagedBattery() { }
+>>>>>>> Stashed changes
     }
 }
