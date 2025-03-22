@@ -16,6 +16,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // Update is called once per frame
+    // Moving the character according to speed
     void Update()
     {
         rb.velocity = new Vector2(horizontalMovement * moveSpeed, rb.velocity.y);   
