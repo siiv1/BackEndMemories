@@ -1,4 +1,3 @@
-repository "Back End Memories/Back End Memories@2475618778100@cloud"
+rep "Back End Memories/Back End Memories@2475618778100@cloud"
   path "/"
-    br "/main"
-    co "/main"
+    smartbranch "/main"

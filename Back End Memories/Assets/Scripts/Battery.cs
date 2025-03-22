@@ -5,17 +5,23 @@ using UnityEngine;
 public class Battery : MonoBehaviour
 {
     Battery NextBattery; // possibly use for easier coordinate checks; and also for checking if equipped battery has backup available (failure means game over)
-    double Power; // remaining battery
-    double DepletionRate; // depletion per tick
+    float Power; // remaining battery
+    static float DepletionRate; // depletion per tick
+    static float MinimumPower;
+    static float FullPower;
     // Start is called before the first frame update
     void Start()
     {
-        
+        Power = UnityEngine.Random.Range(MinimumPower,FullPower);
     }
 
-    private void FixedUpdate()
+    void Update()
     {
-        Power -= DepletionRate;
+            
+    }
+
+    void FixedUpdate()
+    {
     }
 
     // Update is called once per frame
@@ -25,5 +31,10 @@ public class Battery : MonoBehaviour
         {
             // Player.SlotBattery(NextBattery);
         }
+    }
+
+    public float Deplete() {
+        this.Power -= DepletionRate;
+        return this.Power;
     }
 }
