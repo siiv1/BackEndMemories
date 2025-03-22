@@ -21,6 +21,7 @@ public abstract class StageMeta : MonoBehaviour
     private void PopulateBatteries()
     {
         // initialize batteryCount based on tileCount and difficulty level
+        // for (int i = 0; i < batteryCount; i++) {batteryStructure.add(Battery.getBattery());}
         // generate coordinates for initial battery spawns
 
         // will need to update coordinates and remove 

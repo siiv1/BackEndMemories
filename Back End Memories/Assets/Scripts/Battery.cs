@@ -1,18 +1,38 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Battery : MonoBehaviour
 {
-    Battery NextBattery; // possibly use for easier coordinate checks; and also for checking if equipped battery has backup available (failure means game over)
     float Power; // remaining battery
-    static float DepletionRate; // depletion per tick
-    static float MinimumPower;
-    static float FullPower;
+    int batteryId;
     // Start is called before the first frame update
+
+    public void Initialize(){
+        this.Initialize(UnityEngine.Random.Range(BatteryActions.MinimumPower, BatteryActions.FullPower));
+    }
+    public void Initialize(float p) {
+        Power = p;
+        batteryId = batteryNum++;
+
+        if (batteryId == batteries.Length)
+        {
+            Battery[] newb = new Battery[batteryId * 2];
+            for (int i = 0; i < batteryId; i++) newb[i] = batteries[i];
+            batteries = newb;
+        }
+        batteries[batteryId] = this;
+    }
+
     void Start()
     {
-        Power = UnityEngine.Random.Range(MinimumPower,FullPower);
+    }
+
+    public static Battery getBattery() {
+        if (UnityEngine.Random.Range(0f, 1f) < BatteryActions.DamagedChance) return new DamagedBattery();
+        else return new Battery();
     }
 
     void Update()
@@ -34,7 +54,17 @@ public class Battery : MonoBehaviour
     }
 
     public float Deplete() {
-        this.Power -= DepletionRate;
+        this.Power -= BatteryActions.DepletionRate;
         return this.Power;
+    }
+
+    public int getId() {
+        return this.batteryId;
+    }
+
+    public Battery Pickup()
+    {
+        if (this.Power <= 0) return null;
+        else return this;
     }
 }
