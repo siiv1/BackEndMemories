@@ -6,15 +6,18 @@ using UnityEngine;
 
 public class Battery : MonoBehaviour
 {
-<<<<<<< Updated upstream
     float Power; // remaining battery
     int batteryId;
     // Start is called before the first frame update
 
-    public void Initialize(){
+    /*
+     * public void Initialize(){
         this.Initialize(UnityEngine.Random.Range(BatteryActions.MinimumPower, BatteryActions.FullPower));
     }
-    public void Initialize(float p) {
+    */
+
+    /*
+     * public void Initialize(float p) {
         Power = p;
         batteryId = batteryNum++;
 
@@ -25,7 +28,6 @@ public class Battery : MonoBehaviour
             batteries = newb;
         }
         batteries[batteryId] = this;
-=======
     Battery NextBattery; // possibly use for easier coordinate checks; and also for checking if equipped battery has backup available (failure means game over)
     float Power; // remaining battery
     static float DepletionRate; // depletion per tick
@@ -34,25 +36,23 @@ public class Battery : MonoBehaviour
     static float DamagedChance;
     // Start is called before the first frame update
 
-    public Battery() : this(UnityEngine.Random.Range(MinimumPower, FullPower)) {}
+    /*public Battery() : this(UnityEngine.Random.Range(MinimumPower, FullPower)) {}
     public Battery(float p) {
         Power = p;
         
->>>>>>> Stashed changes
     }
+    */
 
     void Start()
     {
     }
 
-    public static Battery getBattery() {
-<<<<<<< Updated upstream
+   /* public static Battery getBattery() {
         if (UnityEngine.Random.Range(0f, 1f) < BatteryActions.DamagedChance) return new DamagedBattery();
-=======
         if (UnityEngine.Random.Range(0f, 1f) < DamagedChance) return new DamagedBattery();
->>>>>>> Stashed changes
         else return new Battery();
     }
+   */
 
     void Update()
     {
@@ -64,16 +64,16 @@ public class Battery : MonoBehaviour
     }
 
     // Update is called once per frame
-    void LateUpdate()
+   /* void LateUpdate()
     {
         if (Power <= 0)
         {
-            // Player.SlotBattery(NextBattery);
+            Player.SlotBattery(NextBattery);
         }
     }
+   */
 
-    public float Deplete() {
-<<<<<<< Updated upstream
+   /* public float Deplete() {
         this.Power -= BatteryActions.DepletionRate;
         return this.Power;
     }
@@ -86,13 +86,11 @@ public class Battery : MonoBehaviour
     {
         if (this.Power <= 0) return null;
         else return this;
-=======
         this.Power -= DepletionRate;
         return this.Power;
     }
 
     class DamagedBattery : Battery {
         public DamagedBattery() { }
->>>>>>> Stashed changes
-    }
+    }*/
 }

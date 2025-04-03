@@ -21,8 +21,9 @@ public class BatteryActions : MonoBehaviour
     {
     }
 
-    public static void createBattery()
-    { 
+    /*public static void createBattery()
+    
+     * { 
         if (batteries.Length == batteryNum)
         {
             Battery[] newb = new Battery[batteryNum * 2];
@@ -40,4 +41,5 @@ public class BatteryActions : MonoBehaviour
     public static Battery getBattery(int id) {
         return batteries[id];
     }
+    */
 }
