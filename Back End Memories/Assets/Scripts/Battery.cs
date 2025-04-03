@@ -6,55 +6,51 @@ using UnityEngine;
 
 public class Battery : MonoBehaviour
 {
+    public static float MinimumPower = 500f;
+    public static float FullPower = 1000f;
+    public static float DepletionRate = FullPower / (60f * 30f); // depletion per tick
+
+    public static float DamagedChance = 0.1f;
+
+    public static Battery[] batteries = new Battery[8];
+    private static int batteryNum = 0;
+
     float Power; // remaining battery
-    int batteryId;
-    // Start is called before the first frame update
+    public int batteryId;
 
-    public void Initialize(){
-        this.Initialize(UnityEngine.Random.Range(BatteryActions.MinimumPower, BatteryActions.FullPower));
-    }
-    public void Initialize(float p) {
+    
+    public Battery() : this(UnityEngine.Random.Range(MinimumPower, FullPower)){}
+    public Battery(float p) {
         Power = p;
-        batteryId = batteryNum++;
+        batteryId = batteryNum;
 
-        if (batteryId == batteries.Length)
+        if (batteryNum == batteries.Length)
         {
-            Battery[] newb = new Battery[batteryId * 2];
-            for (int i = 0; i < batteryId; i++) newb[i] = batteries[i];
-            batteries = newb;
+            Battery[] newBatteries = new Battery[batteryNum * 2];
+            for (int i = 0; i < batteryNum; i++) newBatteries[i] = batteries[i];
+            batteries = newBatteries;
         }
-        batteries[batteryId] = this;
+
+        batteries[batteryNum++] = this;
     }
 
-    void Start()
-    {
-    }
-
-    public static Battery getBattery() {
-        if (UnityEngine.Random.Range(0f, 1f) < BatteryActions.DamagedChance) return new DamagedBattery();
-        else return new Battery();
-    }
-
-    void Update()
-    {
-            
-    }
-
-    void FixedUpdate()
-    {
-    }
-
-    // Update is called once per frame
-    void LateUpdate()
-    {
-        if (Power <= 0)
+    public static int GetBattery() {
+        if (UnityEngine.Random.Range(0f, 1f) < DamagedChance)
         {
-            // Player.SlotBattery(NextBattery);
+            if (batteryNum == batteries.Length)
+            {
+                Battery[] newBatteries = new Battery[batteryNum * 2];
+                for (int i = 0; i < batteryNum; i++) newBatteries[i] = batteries[i];
+                batteries = newBatteries;
+            }
+            batteries[batteryNum] = new DamagedBattery(batteryNum++);
         }
+        else new Battery();
+        return batteryNum - 1; 
     }
 
     public float Deplete() {
-        this.Power -= BatteryActions.DepletionRate;
+        this.Power -= DepletionRate;
         return this.Power;
     }
 

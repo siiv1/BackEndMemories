@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class BatteryActions : MonoBehaviour
-{
-    public static float MinimumPower = 500f;
+public class BatteryActions // : MonoBehaviour
+{}
+/*    public static float MinimumPower = 500f;
     public static float FullPower = 1000f;
     public static float DepletionRate = FullPower / (60f * 30f); // depletion per tick
     public static float DamagedChance = 0.1f;
@@ -40,4 +40,4 @@ public class BatteryActions : MonoBehaviour
     public static Battery getBattery(int id) {
         return batteries[id];
     }
-}
+}*/
