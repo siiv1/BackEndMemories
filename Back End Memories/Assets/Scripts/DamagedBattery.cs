@@ -1,13 +1,17 @@
 class DamagedBattery : Battery
 {
-    public DamagedBattery() { }
-    /*new public Battery Pickup()
+    public DamagedBattery(int id)
+    {
+        this.batteryId = id;
+    }
+
+    new public int Pickup()
     {
         this.Explode();
-        return null;
+        return -1;
     }
-     private void Explode() {
+    private void Explode()
+    {
         Battery.batteries[this.batteryId] = null;
     }
-    */
 }

@@ -45,10 +45,10 @@ public class Battery : MonoBehaviour
                 for (int i = 0; i < batteryNum; i++) newBatteries[i] = batteries[i];
                 batteries = newBatteries;
             }
-            batteries[batteryNum] = new DamagedBattery(batteryNum++);
+            batteries[batteryNum] = new DamagedBattery(batteryNum);
         }
-        else new Battery();
-        return batteryNum - 1;
+        else batteries[batteryNum] = new Battery(batteryNum);
+        return batteryNum-1;
     }
 
     public float Deplete()
