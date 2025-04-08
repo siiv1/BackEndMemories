@@ -28,6 +28,7 @@ public class PlayerMovement : MonoBehaviour
     public Vector2 groundCheckSize = new Vector2(0.5f, 0.05f);
     public LayerMask groundLayer;
     bool isGrounded;
+    private PlatformScript ground;
 
     [Header("Gravity")]
     public float baseGravity = 2f;
@@ -186,10 +187,7 @@ public class PlayerMovement : MonoBehaviour
             jumpsRemaining = maxJumps;
             isGrounded = true;
         }
-        else
-        {
-            isGrounded = false;
-        }
+        else isGrounded = false;
     }
 
     private bool WallCheck()

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Battery
   - DamagedBattery
+  - MovingPlatform
   layers:
   - Default
   - TransparentFX
