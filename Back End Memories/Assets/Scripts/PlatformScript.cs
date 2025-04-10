@@ -106,6 +106,7 @@ public class PlatformScript : MonoBehaviour
         else
         {
             platformRB.velocity = new Vector2(speed * xDirection, speed * yDirection);
+            if (player != null && xDirection != 0 && player.velocity.x * xDirection < speed) player.velocity = new Vector2(player.velocity.x + speed * xDirection, player.velocity.y);
             if (waitCooldown > 0) waitCooldown--;
             else CheckMovementBounds();
         }
@@ -149,8 +150,7 @@ public class PlatformScript : MonoBehaviour
                 xDirection = -1;
                 waitCooldown = remainingWait = waitFrames;
                 platformRB.velocity = new Vector2(0f,0f);
-            }
-            else if (player != null && player.velocity.x * xDirection < speed) player.velocity = new Vector2(player.velocity.x + speed*xDirection,player.velocity.y); 
+            } 
         }
 
     }
