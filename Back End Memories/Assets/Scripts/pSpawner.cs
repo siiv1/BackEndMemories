@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 public class pSpawner : MonoBehaviour
 {
     public GameObject movingPlatform;
-    public static int maxPlatforms = 6;
+    public static int maxPlatforms = 20;
 
     // Start is called before the first frame update
     void Start()

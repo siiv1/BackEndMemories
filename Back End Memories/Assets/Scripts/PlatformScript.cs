@@ -8,10 +8,8 @@ public class PlatformScript : MonoBehaviour
 {
     //Upward movespeed
     private int platformId = 0;
-    private float speed = 3f;
+    private float speed;
     private Rigidbody2D platformRB;
-//x position platform starts at
-    private float xStart;
     private float yBase;
     public float yDirection;
     private float xDirection;
@@ -27,7 +25,9 @@ public class PlatformScript : MonoBehaviour
     private static PlatformScript[] platforms = new PlatformScript[maxPlatforms];
     private static float lastY;
     private static bool lastStart = false;
-    private static float yOffset = 6f;
+    private static float yOffset = 8f;
+    private static float playerRoom = 3.5f;
+    private static float vertRange = yOffset - playerRoom;
     private static int waitFrames = 60;
 
 // Start is called before the first frame update
@@ -50,32 +50,37 @@ public class PlatformScript : MonoBehaviour
             yBase = platformRB.position.y;
             yDirection = 1;
             xDirection = 0;
-            lastY = yBase - (yOffset - 2f);
-            yStart = yBase - (yOffset / 2);
+            lastY = yBase - vertRange;
+            yStart = yBase - (vertRange * 3 / 4);
             lastStart = true;
+            speed = 3f;
         }
         else
         {
-            if (platformId % 2 == UnityEngine.Random.Range(0, 3)) 
+            speed = UnityEngine.Random.Range(2f, 4f);
+            
+            if (platformId % 2 == UnityEngine.Random.Range(0, 2)) 
             {
                 xDirection = platformId % 2 == 1 ? 1 : -1;
                 yDirection = 0;
             }
             else {
                 xDirection = 0;
-                yDirection = platformId % 2 == 1 ? 1 : -1;
+                yDirection = platformId % 2 == 0 ? 1 : -1;
             }
 
             if (yDirection == 0)
             {
-                lastY -= yOffset + 2f;
+                lastY -= playerRoom;
+                if (platforms[platformId - 1].yDirection == 0) lastY -= 1f;
+
                 yStart = yBase = lastY;
             }
             else
             {
-                yBase = lastY - 2f;
-                lastY -= yOffset;
-                yStart = yBase - (yOffset / 2) - (yOffset / 4 * yDirection);
+                yBase = lastY - playerRoom;
+                lastY = yBase - vertRange;
+                yStart = yBase - (vertRange/2) - (vertRange / 4 * yDirection);
             }
         }
         
@@ -132,7 +137,7 @@ public class PlatformScript : MonoBehaviour
                 platformRB.velocity = new Vector2(0,0);
                 if (player != null) player.velocity = new Vector2(player.velocity.x, 0);
             }
-            else if (transform.position.y < yBase-(yOffset-2f)){
+            else if (transform.position.y < yBase-vertRange){
                 yDirection = 1;
                 waitCooldown = remainingWait = waitFrames;
                 platformRB.velocity = new Vector2(0,0);
