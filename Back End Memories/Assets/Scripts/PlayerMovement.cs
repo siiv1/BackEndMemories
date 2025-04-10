@@ -53,11 +53,11 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        animator.GetComponent<Animator>();
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         GroundCheck();
         Gravity();
@@ -67,10 +67,12 @@ public class PlayerMovement : MonoBehaviour
         {
             // Moving the character according to their speed
             rb.velocity = new Vector2 (horizontalMovement * moveSpeed, rb.velocity.y);
+            animator.SetFloat("magnitude", rb.velocity.magnitude);
             Flip();
         }
-        /*animator.SetFloat("yVelocity", rb.velocity.y);
-        animator.SetFloat("magnitude", rb.velocity.magnitude);*/
+        animator.SetFloat("yVelocity", rb.velocity.y);
+        animator.SetBool("isGrounded", isGrounded);
+        animator.SetBool("isWallSliding", isWallSliding);
     }
 
     private void Gravity()
@@ -87,7 +89,18 @@ public class PlayerMovement : MonoBehaviour
     }
     public void Move(InputAction.CallbackContext context)
     {
+        //Reading movement value
         horizontalMovement = context.ReadValue<Vector2>().x;
+
+        //Calling the appropriate animation for right and left movement
+        if (horizontalMovement > 0)
+        {
+            animator.SetTrigger("isFacingRight");
+        }
+        else if (horizontalMovement < 0)
+        {
+            animator.SetTrigger("isFacingLeft");
+        }
     }
     
     //Jumping mechanic according to player's interaction
@@ -100,14 +113,13 @@ public class PlayerMovement : MonoBehaviour
                 // Hold down jump button = full height
                 rb.velocity = new Vector2(rb.velocity.x, jumpPower);
                 jumpsRemaining--;
-                //animator.SetTrigger("jump");
+                animator.SetTrigger("jump");
             }
             else if (context.canceled)
             {
                 // Tap jump button = half height
                 rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
                 jumpsRemaining--;
-               // animator.SetTrigger("jump");
 
             }
         }
@@ -118,7 +130,7 @@ public class PlayerMovement : MonoBehaviour
             isWallJumping = true;
             rb.velocity = new Vector2(wallJumpDirection * wallJumpPower.x, wallJumpPower.y); //Jump off wall
             wallJumpTimer = 0;
-            //animator.SetTrigger("jump");
+            animator.SetTrigger("jump");
             //Force Flip
             if (transform.localScale.x != wallJumpDirection)
             {
@@ -140,6 +152,16 @@ public class PlayerMovement : MonoBehaviour
         {
             isWallSliding = true;
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -wallSlideSpeed));
+
+            //Calling the appropriate animation for right and left wallslides
+            if (isPressingIntoWall && IsTouchingRightWall())
+            {
+                animator.SetTrigger("rightSlide");
+            }
+            else if (isPressingIntoWall && IsTouchingLeftWall())
+            {
+                animator.SetTrigger("leftSlide");
+            }
         }
         else
         {
@@ -159,6 +181,7 @@ public class PlayerMovement : MonoBehaviour
                transform.localScale.x < 0; // Facing left
     }
 
+    //Checking first if we're wallsliding, then doing the jump and setting the time delay
     private void WallJump()
     {
         if (isWallSliding)
@@ -199,14 +222,14 @@ public class PlayerMovement : MonoBehaviour
     {
         // Only flip if not wall-sliding, not wall-jumping, and movement direction changes
         if (!isWallSliding && !isWallJumping &&
-            ((isFacingRight && horizontalMovement < 0) || (!isFacingRight && horizontalMovement > 0)))
+            (isFacingRight && horizontalMovement < 0) || (!isFacingRight && horizontalMovement > 0))
         {
             isFacingRight = !isFacingRight;
             Vector3 ls = transform.localScale;
             ls.x *= -1f;
             transform.localScale = ls;
-
         }
+       
     }
     //For adjusting the parameters below and beside the player that detect the ground and wall
     private void OnDrawGizmosSelected()

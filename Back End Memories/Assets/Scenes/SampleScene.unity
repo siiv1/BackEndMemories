@@ -431,7 +431,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 241930617}
-  animator: {fileID: 0}
+  animator: {fileID: 241930622}
   moveSpeed: 15
   jumpPower: 12
   maxJumps: 2
