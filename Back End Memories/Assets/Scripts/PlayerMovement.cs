@@ -10,7 +10,8 @@ public class PlayerMovement : MonoBehaviour
     public Rigidbody2D rb;
     public Animator animator;
     [Header("Health")]
-    private int health = 4;
+    private static int maxHealth = 4;
+    private int health = PlayerMovement.maxHealth;
     bool isFacingRight = true;
 
     [Header("Movement")]
@@ -106,12 +107,14 @@ public class PlayerMovement : MonoBehaviour
     //Jumping mechanic according to player's interaction
     public void Jump(InputAction.CallbackContext context)
     {
+        float jumpDamage = health / PlayerMovement.maxHealth;
+
         if (jumpsRemaining > 0)
         {
             if (context.performed)
             {
                 // Hold down jump button = full height
-                rb.velocity = new Vector2(rb.velocity.x, jumpPower);
+                rb.velocity = new Vector2(rb.velocity.x, jumpDamage * jumpPower);
                 jumpsRemaining--;
                 animator.SetTrigger("jump");
             }
@@ -125,10 +128,10 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //Wall Jump
-        if (context.performed && wallJumpTimer > 0f)
+        if (health > 2 && context.performed && wallJumpTimer > 0f)
         {
             isWallJumping = true;
-            rb.velocity = new Vector2(wallJumpDirection * wallJumpPower.x, wallJumpPower.y); //Jump off wall
+            rb.velocity = new Vector2(jumpDamage * wallJumpDirection * wallJumpPower.x, jumpDamage * wallJumpPower.y); //Jump off wall
             wallJumpTimer = 0;
             animator.SetTrigger("jump");
             //Force Flip
@@ -148,7 +151,7 @@ public class PlayerMovement : MonoBehaviour
         bool isPressingIntoWall = (horizontalMovement > 0 && IsTouchingRightWall()) ||
                                  (horizontalMovement < 0 && IsTouchingLeftWall());
 
-        if (!isGrounded && isPressingIntoWall)
+        if (health > 1 && !isGrounded && isPressingIntoWall)
         {
             isWallSliding = true;
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -wallSlideSpeed));
@@ -184,7 +187,7 @@ public class PlayerMovement : MonoBehaviour
     //Checking first if we're wallsliding, then doing the jump and setting the time delay
     private void WallJump()
     {
-        if (isWallSliding)
+        if (health > 2 && isWallSliding)
         {
             isWallJumping = false;
             wallJumpDirection = -transform.localScale.x;
