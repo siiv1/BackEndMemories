@@ -145,23 +145,28 @@ public class PlayerMovement : MonoBehaviour
 
     private void WallSlide()
     {
-        bool isPressingIntoWall = (horizontalMovement > 0 && IsTouchingRightWall()) ||
-                                 (horizontalMovement < 0 && IsTouchingLeftWall());
+        //Checking for wallsliding and Calling the appropriate animation for right and left wallslides
+        bool isPressingIntoWall;
+
+        if (horizontalMovement > 0 && IsTouchingRightWall() && !isGrounded)
+        {
+            isPressingIntoWall = true;
+            animator.SetTrigger("rightSlide");
+        }
+        else if (horizontalMovement < 0 && IsTouchingLeftWall() && !isGrounded)
+        {
+            isPressingIntoWall = true;
+            animator.SetTrigger("leftSlide");
+        }
+        else
+        {
+            isPressingIntoWall = false;
+        }
 
         if (pv.mvmtMod > 0.25f && !isGrounded && isPressingIntoWall)
         {
             isWallSliding = true;
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -wallSlideSpeed));
-
-            //Calling the appropriate animation for right and left wallslides
-            if (isPressingIntoWall && IsTouchingRightWall())
-            {
-                animator.SetTrigger("rightSlide");
-            }
-            else if (isPressingIntoWall && IsTouchingLeftWall())
-            {
-                animator.SetTrigger("leftSlide");
-            }
         }
         else
         {
