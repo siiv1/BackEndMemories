@@ -12,9 +12,12 @@ public class PlayerMovement : MonoBehaviour
     [Header("Health")]
     private static int maxHealth = 4;
     private int health = PlayerMovement.maxHealth;
-    bool isFacingRight = true;
+    private float playerPower;
+    private Battery currentBattery;
+    private Battery offhandBattery;
 
     [Header("Movement")]
+    bool isFacingRight = true;
     public float moveSpeed = 5f;
     //public float playerMvmtMult = 0.5f;
     float horizontalMovement;
@@ -55,6 +58,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         animator.GetComponent<Animator>();
+        currentBattery = new Battery(Battery.FullPower);
     }
 
     // Update is called once per frame
@@ -74,6 +78,8 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("yVelocity", rb.velocity.y);
         animator.SetBool("isGrounded", isGrounded);
         animator.SetBool("isWallSliding", isWallSliding);
+
+        BatteryUpdate();
     }
 
     private void Gravity()
@@ -234,6 +240,25 @@ public class PlayerMovement : MonoBehaviour
         }
        
     }
+
+    private void BatteryUpdate() {
+        playerPower = currentBattery.Deplete();
+
+        if (currentBattery == null)
+        {
+            if (offhandBattery == null)
+            {
+                // GameOver
+            }
+            else
+            {
+                currentBattery = offhandBattery;
+                offhandBattery = null;
+                // maybe some graphical stuff
+            }
+        }
+    }
+
     //For adjusting the parameters below and beside the player that detect the ground and wall
     private void OnDrawGizmosSelected()
     {
