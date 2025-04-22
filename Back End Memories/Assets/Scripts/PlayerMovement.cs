@@ -9,13 +9,8 @@ public class PlayerMovement : MonoBehaviour
     //some public variables for the player
     public Rigidbody2D rb;
     public Animator animator;
-    [Header("Health")]
-    private static int maxHealth = 4;
-    private int health = PlayerMovement.maxHealth;
-    private float playerPower;
-    private Battery currentBattery;
-    private Battery offhandBattery;
-
+    private PlayerValues pv;
+    
     [Header("Movement")]
     bool isFacingRight = true;
     public float moveSpeed = 5f;
@@ -58,7 +53,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         animator.GetComponent<Animator>();
-        currentBattery = new Battery(Battery.FullPower);
+        pv.GetComponent<PlayerValues>();
     }
 
     // Update is called once per frame
@@ -78,8 +73,6 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("yVelocity", rb.velocity.y);
         animator.SetBool("isGrounded", isGrounded);
         animator.SetBool("isWallSliding", isWallSliding);
-
-        BatteryUpdate();
     }
 
     private void Gravity()
@@ -113,14 +106,12 @@ public class PlayerMovement : MonoBehaviour
     //Jumping mechanic according to player's interaction
     public void Jump(InputAction.CallbackContext context)
     {
-        float jumpDamage = health / PlayerMovement.maxHealth;
-
         if (jumpsRemaining > 0)
         {
             if (context.performed)
             {
                 // Hold down jump button = full height
-                rb.velocity = new Vector2(rb.velocity.x, jumpDamage * jumpPower);
+                rb.velocity = new Vector2(rb.velocity.x, pv.mvmtMod * jumpPower);
                 jumpsRemaining--;
                 animator.SetTrigger("jump");
             }
@@ -134,10 +125,10 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //Wall Jump
-        if (health > 2 && context.performed && wallJumpTimer > 0f)
+        if (pv.mvmtMod > 0.5f && context.performed && wallJumpTimer > 0f)
         {
             isWallJumping = true;
-            rb.velocity = new Vector2(jumpDamage * wallJumpDirection * wallJumpPower.x, jumpDamage * wallJumpPower.y); //Jump off wall
+            rb.velocity = new Vector2(pv.mvmtMod * wallJumpDirection * wallJumpPower.x, pv.mvmtMod * wallJumpPower.y*2); //Jump off wall
             wallJumpTimer = 0;
             animator.SetTrigger("jump");
             //Force Flip
@@ -157,7 +148,7 @@ public class PlayerMovement : MonoBehaviour
         bool isPressingIntoWall = (horizontalMovement > 0 && IsTouchingRightWall()) ||
                                  (horizontalMovement < 0 && IsTouchingLeftWall());
 
-        if (health > 1 && !isGrounded && isPressingIntoWall)
+        if (pv.mvmtMod > 0.25f && !isGrounded && isPressingIntoWall)
         {
             isWallSliding = true;
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -wallSlideSpeed));
@@ -193,7 +184,7 @@ public class PlayerMovement : MonoBehaviour
     //Checking first if we're wallsliding, then doing the jump and setting the time delay
     private void WallJump()
     {
-        if (health > 2 && isWallSliding)
+        if (pv.mvmtMod > 0.5f && isWallSliding)
         {
             isWallJumping = false;
             wallJumpDirection = -transform.localScale.x;
@@ -239,24 +230,6 @@ public class PlayerMovement : MonoBehaviour
             transform.localScale = ls;
         }
        
-    }
-
-    private void BatteryUpdate() {
-        playerPower = currentBattery.Deplete();
-
-        if (currentBattery == null)
-        {
-            if (offhandBattery == null)
-            {
-                // GameOver
-            }
-            else
-            {
-                currentBattery = offhandBattery;
-                offhandBattery = null;
-                // maybe some graphical stuff
-            }
-        }
     }
 
     //For adjusting the parameters below and beside the player that detect the ground and wall

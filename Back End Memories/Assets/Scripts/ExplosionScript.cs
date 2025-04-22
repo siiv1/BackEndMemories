@@ -21,7 +21,7 @@ public class ExplosionScript : MonoBehaviour
         this.transform.localScale += inc;
         if (++tick >= 60) 
         {
-            Destroy(this);
+            Destroy(gameObject);
         }
         else if (tick % 20 == 0)
         {
