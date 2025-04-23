@@ -13,7 +13,6 @@ public class PlatformScript : MonoBehaviour
     private float yBase;
     public float yDirection;
     private float xDirection;
-    private Rigidbody2D player;
     private int remainingWait = 0;
     private int waitCooldown = 0;
 
@@ -24,14 +23,13 @@ public class PlatformScript : MonoBehaviour
     private static int maxPlatforms = pSpawner.maxPlatforms;
     private static PlatformScript[] platforms = new PlatformScript[maxPlatforms];
     private static float lastY;
-    private static bool lastStart = false;
-    private static float yOffset = 8f;
-    private static float playerRoom = 3.5f;
+    public static float yOffset = 8f;
+    public static float playerRoom = 3.5f;
     private static float vertRange = yOffset - playerRoom;
     private static int waitFrames = 60;
 
 // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         platformRB = GetComponent<Rigidbody2D>();
         platformId = platformCount;
@@ -52,12 +50,11 @@ public class PlatformScript : MonoBehaviour
             xDirection = 0;
             lastY = yBase - vertRange;
             yStart = yBase - (vertRange * 3 / 4);
-            lastStart = true;
-            speed = 3f;
+            speed = 3f / 50f;
         }
         else
         {
-            speed = UnityEngine.Random.Range(2f, 4f);
+            speed = UnityEngine.Random.Range(2f, 4f) / 50f;
             
             if (platformId % 2 == UnityEngine.Random.Range(0, 2)) 
             {
@@ -110,21 +107,21 @@ public class PlatformScript : MonoBehaviour
         if (remainingWait > 0) remainingWait--;
         else
         {
-            platformRB.velocity = new Vector2(speed * xDirection, speed * yDirection);
-            if (player != null && xDirection != 0 && player.velocity.x * xDirection < speed) player.velocity = new Vector2(player.velocity.x + speed * xDirection, player.velocity.y);
+            transform.position = new Vector2(transform.position.x + speed * xDirection, transform.position.y + speed * yDirection);
             if (waitCooldown > 0) waitCooldown--;
             else CheckMovementBounds();
         }
     }
 
     void OnCollisionEnter2D(Collision2D collider) {
-        player = collider.rigidbody;
+        collider.transform.SetParent(transform);
     }
+
     void OnCollisionExit2D(Collision2D collider)
     {
-        player = null;
+        collider.transform.SetParent(null);
     }
-    
+
     private void CheckMovementBounds()
     {
         if (yDirection != 0)
@@ -134,13 +131,10 @@ public class PlatformScript : MonoBehaviour
             {
                 yDirection = -1;
                 waitCooldown = remainingWait = waitFrames;
-                platformRB.velocity = new Vector2(0,0);
-                if (player != null) player.velocity = new Vector2(player.velocity.x, 0);
             }
             else if (transform.position.y < yBase-vertRange){
                 yDirection = 1;
                 waitCooldown = remainingWait = waitFrames;
-                platformRB.velocity = new Vector2(0,0);
             }
         }
         else if (xDirection != 0)
@@ -149,14 +143,17 @@ public class PlatformScript : MonoBehaviour
             {
                 xDirection = 1;
                 waitCooldown = remainingWait = waitFrames;
-                platformRB.velocity = new Vector2(0f,0f);
             }
             else if (transform.position.x > xLocations[xLocations.Length-1]-.9f){
                 xDirection = -1;
                 waitCooldown = remainingWait = waitFrames;
-                platformRB.velocity = new Vector2(0f,0f);
             } 
         }
 
+    }
+
+    public static float GetBottom() 
+    {
+        return lastY;
     }
 }
