@@ -604,6 +604,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   wallSlideSpeed: 2
+  wallJumpDampener: 0.98
   wallJumpPower: {x: 7, y: 10}
 --- !u!114 &241930621
 MonoBehaviour:

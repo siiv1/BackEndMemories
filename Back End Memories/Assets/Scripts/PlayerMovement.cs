@@ -13,7 +13,7 @@ public class PlayerMovement : MonoBehaviour
     
     [Header("Movement")]
     bool isFacingRight = true;
-    public float moveSpeed = 5f;
+    public float moveSpeed = 3f;
     //public float playerMvmtMult = 0.5f;
     float horizontalMovement;
  
@@ -45,9 +45,10 @@ public class PlayerMovement : MonoBehaviour
     //Wall Jumping
     bool isWallJumping;
     float wallJumpDirection;
-    float wallJumpTime = 0.5f;
+    float wallJumpTime = 0.3f;
     float wallJumpTimer;
-    public Vector2 wallJumpPower = new Vector2(5f, 10f);
+    public float wallJumpDampener = 0.995f;
+    public Vector2 wallJumpPower = new Vector2(6f, 10f);
 
     // Start is called before the first frame update
     void Start()
@@ -69,6 +70,10 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = new Vector2(horizontalMovement * moveSpeed, rb.velocity.y);
             animator.SetFloat("magnitude", rb.velocity.magnitude);
             Flip();
+        }
+        else
+        {
+            rb.velocity = new Vector2(rb.velocity.x * wallJumpDampener, rb.velocity.y); // reducing wall jump horizontal velocity
         }
         animator.SetFloat("yVelocity", rb.velocity.y);
         animator.SetBool("isGrounded", isGrounded);
@@ -130,6 +135,7 @@ public class PlayerMovement : MonoBehaviour
             isWallJumping = true;
             rb.velocity = new Vector2((0.5f * (1 + pv.mvmtMod)) * wallJumpDirection * wallJumpPower.x, pv.mvmtMod * wallJumpPower.y); //Jump off wall
             wallJumpTimer = 0;
+            if (pv.mvmtMod > 0.75f) jumpsRemaining = maxJumps;
             animator.SetTrigger("jump");
             //Force Flip
             if (transform.localScale.x != wallJumpDirection)
@@ -139,7 +145,7 @@ public class PlayerMovement : MonoBehaviour
                 ls.x *= -1f;
                 transform.localScale = ls;
             }
-            Invoke(nameof(CancelWallJump), wallJumpTime + 0.1f); //Wall Jump lasts 0.5f -- Jump again = 0.6f
+            Invoke(nameof(CancelWallJump), wallJumpTime + 0.2f); //Wall Jump lasts 0.5f -- Jump again = 0.6f
         }
     }
 
