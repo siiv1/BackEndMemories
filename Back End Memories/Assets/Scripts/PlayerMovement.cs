@@ -111,7 +111,7 @@ public class PlayerMovement : MonoBehaviour
             if (context.performed)
             {
                 // Hold down jump button = full height
-                rb.velocity = new Vector2(rb.velocity.x, pv.mvmtMod * jumpPower);
+                rb.velocity = new Vector2(rb.velocity.x, Mathf.Max((0.5f * (1 + pv.mvmtMod)),0.74f) * jumpPower);
                 jumpsRemaining--;
                 animator.SetTrigger("jump");
             }
@@ -128,7 +128,7 @@ public class PlayerMovement : MonoBehaviour
         if (pv.mvmtMod > 0.5f && context.performed && wallJumpTimer > 0f)
         {
             isWallJumping = true;
-            rb.velocity = new Vector2(pv.mvmtMod * wallJumpDirection * wallJumpPower.x, pv.mvmtMod * wallJumpPower.y*2); //Jump off wall
+            rb.velocity = new Vector2((0.5f * (1 + pv.mvmtMod)) * wallJumpDirection * wallJumpPower.x, pv.mvmtMod * wallJumpPower.y); //Jump off wall
             wallJumpTimer = 0;
             animator.SetTrigger("jump");
             //Force Flip
@@ -215,7 +215,10 @@ public class PlayerMovement : MonoBehaviour
             jumpsRemaining = maxJumps;
             isGrounded = true;
         }
-        else isGrounded = false;
+        else
+        {
+            isGrounded = false;
+        }
     }
 
     private bool WallCheck()
