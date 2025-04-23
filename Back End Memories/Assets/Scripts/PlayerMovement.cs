@@ -9,10 +9,12 @@ public class PlayerMovement : MonoBehaviour
     //some public variables for the player
     public Rigidbody2D rb;
     public Animator animator;
-    private PlayerValues pv;
-    
-    [Header("Movement")]
+    [Header("Health")]
+    private static int maxHealth = 4;
+    private int health = PlayerMovement.maxHealth;
     bool isFacingRight = true;
+
+    [Header("Movement")]
     public float moveSpeed = 5f;
     //public float playerMvmtMult = 0.5f;
     float horizontalMovement;
@@ -45,34 +47,45 @@ public class PlayerMovement : MonoBehaviour
     //Wall Jumping
     bool isWallJumping;
     float wallJumpDirection;
-    float wallJumpTime = 0.5f;
+    float wallJumpTime = 0.6f;
     float wallJumpTimer;
     public Vector2 wallJumpPower = new Vector2(5f, 10f);
+
+    [Header("UI Control")]
+    public static bool isUIOpen = false;
 
     // Start is called before the first frame update
     void Start()
     {
         animator.GetComponent<Animator>();
-        pv.GetComponent<PlayerValues>();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        GroundCheck();
-        Gravity();
-        WallSlide();
-        WallJump();
-        if (!isWallJumping)
+        //check if any UI open 
+        if (!isUIOpen)
         {
-            // Moving the character according to their speed
-            rb.velocity = new Vector2 (horizontalMovement * moveSpeed, rb.velocity.y);
-            animator.SetFloat("magnitude", rb.velocity.magnitude);
-            Flip();
+            GroundCheck();
+            Gravity();
+            WallSlide();
+            WallJump();
+            if (!isWallJumping)
+            {
+                // Moving the character according to their speed
+                rb.velocity = new Vector2(horizontalMovement * moveSpeed, rb.velocity.y);
+                animator.SetFloat("magnitude", rb.velocity.magnitude);
+                Flip();
+            }
         }
+        else
+        {
+            // Freeze player completely
+            rb.velocity = Vector2.zero;
+        }
+           
         animator.SetFloat("yVelocity", rb.velocity.y);
         animator.SetBool("isGrounded", isGrounded);
-        animator.SetBool("isWallSliding", isWallSliding);
     }
 
     private void Gravity()
@@ -106,12 +119,14 @@ public class PlayerMovement : MonoBehaviour
     //Jumping mechanic according to player's interaction
     public void Jump(InputAction.CallbackContext context)
     {
+        float jumpDamage = health / PlayerMovement.maxHealth;
+
         if (jumpsRemaining > 0)
         {
             if (context.performed)
             {
                 // Hold down jump button = full height
-                rb.velocity = new Vector2(rb.velocity.x, pv.mvmtMod * jumpPower);
+                rb.velocity = new Vector2(rb.velocity.x, jumpDamage * jumpPower);
                 jumpsRemaining--;
                 animator.SetTrigger("jump");
             }
@@ -125,10 +140,10 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //Wall Jump
-        if (pv.mvmtMod > 0.5f && context.performed && wallJumpTimer > 0f)
+        if (health > 2 && context.performed && wallJumpTimer > 0f)
         {
             isWallJumping = true;
-            rb.velocity = new Vector2(pv.mvmtMod * wallJumpDirection * wallJumpPower.x, pv.mvmtMod * wallJumpPower.y*2); //Jump off wall
+            rb.velocity = new Vector2(jumpDamage * wallJumpDirection * wallJumpPower.x, jumpDamage * wallJumpPower.y); //Jump off wall
             wallJumpTimer = 0;
             animator.SetTrigger("jump");
             //Force Flip
@@ -145,32 +160,32 @@ public class PlayerMovement : MonoBehaviour
 
     private void WallSlide()
     {
-        //Checking for wallsliding and Calling the appropriate animation for right and left wallslides
-        bool isPressingIntoWall;
+        bool isPressingIntoWall = (horizontalMovement > 0 && IsTouchingRightWall()) || (horizontalMovement < 0 && IsTouchingLeftWall());
+        bool rSlide = false;
+        bool lSlide = false;
 
-        if (horizontalMovement > 0 && IsTouchingRightWall() && !isGrounded)
-        {
-            isPressingIntoWall = true;
-            animator.SetTrigger("rightSlide");
-        }
-        else if (horizontalMovement < 0 && IsTouchingLeftWall() && !isGrounded)
-        {
-            isPressingIntoWall = true;
-            animator.SetTrigger("leftSlide");
-        }
-        else
-        {
-            isPressingIntoWall = false;
-        }
-
-        if (pv.mvmtMod > 0.25f && !isGrounded && isPressingIntoWall)
+        if (health > 1 && !isGrounded && isPressingIntoWall)
         {
             isWallSliding = true;
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -wallSlideSpeed));
+
+            //Calling the appropriate animation for right and left wallslides
+            if (isPressingIntoWall && IsTouchingRightWall())
+            {
+                rSlide = true;
+                animator.SetBool("rightSlide", rSlide);
+            }
+            else if (isPressingIntoWall && IsTouchingLeftWall())
+            {
+                lSlide = true;
+                animator.SetBool("leftSlide", lSlide);
+            }
         }
-        else
+        else if(!isPressingIntoWall)
         {
             isWallSliding = false;
+            animator.SetBool("rightSlide", isWallSliding);
+            animator.SetBool("leftSlide", isWallSliding);
         }
     }
 
@@ -189,7 +204,7 @@ public class PlayerMovement : MonoBehaviour
     //Checking first if we're wallsliding, then doing the jump and setting the time delay
     private void WallJump()
     {
-        if (pv.mvmtMod > 0.5f && isWallSliding)
+        if (health > 2 && isWallSliding)
         {
             isWallJumping = false;
             wallJumpDirection = -transform.localScale.x;
@@ -236,7 +251,6 @@ public class PlayerMovement : MonoBehaviour
         }
        
     }
-
     //For adjusting the parameters below and beside the player that detect the ground and wall
     private void OnDrawGizmosSelected()
     {

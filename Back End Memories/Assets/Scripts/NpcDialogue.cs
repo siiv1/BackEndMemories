@@ -7,9 +7,22 @@ using TMPro;
 
 public class NpcDialogue : MonoBehaviour
 {
+    //Managing the speaker and lines
+    [System.Serializable]
+    public struct DialogueLine
+    {
+        public string speaker;
+        public string text;
+        public Sprite portrait; // Optional
+    }
+    /*public string speakerName;
+    public Sprite speakerPortrait;
+    */
     public GameObject dialoguePanel;
+    public TextMeshProUGUI nameTxt; //assign in Inspector
     public TextMeshProUGUI dialogueText;
-    public string[] dialogue;
+    public Image portraitImage;
+    public DialogueLine[] dialogueLines;
     private int index = 0;
 
     public float wordSpeed;
@@ -18,47 +31,99 @@ public class NpcDialogue : MonoBehaviour
     void Start()
 
     {
-        dialogueText.text = "";
+        if (dialogueText != null)
+            dialogueText.text = string.Empty;
+        if (nameTxt != null)
+            nameTxt.text = string.Empty;
     }
+    
 
     // Update is called once per frame
     void Update()
-
     {
-        //to Start Dialogue
+
+        //to Start lines
         if (Input.GetKeyDown(KeyCode.Z) && playerIsClose)
         {
             if (!dialoguePanel.activeInHierarchy)
+            // Start new dialogue
             {
                 dialoguePanel.SetActive(true);
-                StartCoroutine(Typing());
+                PlayerMovement.isUIOpen = true;
+                StartDialogue();
             }
-            else if (dialogueText.text == dialogue[index])
+            else if (dialogueText.text == dialogueLines[index].text)
             {
+                // Continue to next line
                 NextLine();
             }
+
+            else
+            {
+                StopAllCoroutines();
+                dialogueText.text = dialogueLines[index].text;
+                PlayerMovement.isUIOpen = false;
+            }
         }
-        //to Quit dialogue
+        //to Quit lines
         if (Input.GetKeyDown(KeyCode.Q) && dialoguePanel.activeInHierarchy)
         {
             RemoveText();
         }
     }
 
+    
+    void StartDialogue()
+    {
+        //to Start Dialogue
+        index = 0;
+        UpdateSpeakerInfo();
+        StartCoroutine(Typing());
+    }
     public void RemoveText()
     {
-
+        StopAllCoroutines();
         dialogueText.text = "";
-
+        nameTxt.text = "";
         index = 0;
-
+        PlayerMovement.isUIOpen = false;
         dialoguePanel.SetActive(false);
+    }
+
+    public void NextLine()
+
+    {
+
+        if (index < dialogueLines.Length - 1)
+
+        {
+
+            index++;
+
+            dialogueText.text = string.Empty;
+            UpdateSpeakerInfo();
+            StartCoroutine(Typing());
+
+        }
+
+        else
+
+        {
+            RemoveText();
+        }
+
+    }
+    void UpdateSpeakerInfo()
+    {
+        nameTxt.text = dialogueLines[index].speaker;
+        if (portraitImage != null)
+            portraitImage.sprite = dialogueLines[index].portrait;
     }
 
     IEnumerator Typing()
     {
-
-        foreach (char letter in dialogue[index].ToCharArray())
+        dialogueText.text = "";
+        foreach (char letter in dialogueLines[index].text.ToCharArray())
 
         {
 
@@ -69,33 +134,6 @@ public class NpcDialogue : MonoBehaviour
         }
 
     }
-
-    public void NextLine()
-
-    {
-
-        if (index < dialogue.Length - 1)
-
-        {
-
-            index++;
-
-            dialogueText.text = "";
-
-            StartCoroutine(Typing());
-
-        }
-
-        else
-
-        {
-
-            RemoveText();
-
-        }
-
-    }
-
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
@@ -108,7 +146,7 @@ public class NpcDialogue : MonoBehaviour
     private void OnTriggerExit2D(Collider2D other)
 
     {
-        if (other.CompareTag("Player"))
+        if ((other.CompareTag("Player"))&&other!=null)
         {
 
             playerIsClose = false;
