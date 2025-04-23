@@ -41,7 +41,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("WallMovement")]
     public float wallSlideSpeed = 2;
-    bool isWallSliding;
+    bool isWallSliding = false;
     //Wall Jumping
     bool isWallJumping;
     float wallJumpDirection;
@@ -53,7 +53,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         animator.GetComponent<Animator>();
-        pv.GetComponent<PlayerValues>();
+        pv = gameObject.GetComponent<PlayerValues>();
     }
 
     // Update is called once per frame
@@ -66,7 +66,7 @@ public class PlayerMovement : MonoBehaviour
         if (!isWallJumping)
         {
             // Moving the character according to their speed
-            rb.velocity = new Vector2 (horizontalMovement * moveSpeed, rb.velocity.y);
+            rb.velocity = new Vector2(horizontalMovement * moveSpeed, rb.velocity.y);
             animator.SetFloat("magnitude", rb.velocity.magnitude);
             Flip();
         }

@@ -6,19 +6,21 @@ public class PlayerValues : MonoBehaviour
 {
     [Header("Health")]
     private static int maxHealth = 4;
-    private int health = maxHealth;
+    public int health = maxHealth;
     public float mvmtMod = 1f;
 
     [Header("Energy")]
-    private float playerPower;
-    private Battery currentBattery;
-    private Battery offhandBattery;
+    public float currentBattery = Battery.FullPower;
+    public float offhandBattery;
 
+    private void Awake()
+    {
+
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        currentBattery = new Battery(Battery.FullPower);
     }
 
     // Update is called once per frame
@@ -34,21 +36,38 @@ public class PlayerValues : MonoBehaviour
 
     private void BatteryUpdate()
     {
-        playerPower = currentBattery.Deplete();
-
-        if (currentBattery == null)
+        if (currentBattery > 0f)
         {
-            if (offhandBattery == null)
+            Deplete();
+
+            if (currentBattery <= 0f)
             {
-                // GameOver
-            }
-            else
-            {
-                currentBattery = offhandBattery;
-                offhandBattery = null;
-                // maybe some graphical stuff
+                if (offhandBattery <= 0f)
+                {
+                    PlayerMovement pm = GetComponent<PlayerMovement>();
+                    pm.moveSpeed = 0f;
+                    pm.maxJumps = 0;
+                    // GameOver
+                }
+                else
+                {
+                    currentBattery = offhandBattery;
+                    offhandBattery = 0f;
+                    // maybe some graphical stuff
+                }
             }
         }
     }
 
+    private void Deplete() 
+    {
+        currentBattery -= Battery.DepletionRate;
+    }
+
+    public void InsertBattery(Battery battery)
+    {
+        offhandBattery = currentBattery;
+        currentBattery = battery.RemainingPower();
+        Destroy(battery.gameObject);
+    }
 }

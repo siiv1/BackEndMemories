@@ -2,13 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Battery : MonoBehaviour
 {
-    public GameObject battery;
-    public GameObject damagedBattery;
-
     public static float FullPower = 1000f;
     public static float MinimumPower = FullPower / 2;
     public static float DamagedChance = FullPower / 10;
@@ -23,10 +22,47 @@ public class Battery : MonoBehaviour
     public bool damaged;
     GameObject Explosion;
 
+    private void Awake()
+    {
+        if (Power < .1f)
+        {
+            float power = UnityEngine.Random.Range(0f, FullPower);
+
+            if (power <= DamagedChance)
+            {
+                damaged = true;
+                Power = 0f;
+            }
+            else
+            {
+                damaged = false;
+
+                if (power < MinimumPower)
+                    Power = (power / MinimumPower) * (FullPower - MinimumPower) + MinimumPower;
+
+                else Power = power;
+            }
+        }
+    }
+
+    public Battery() 
+    {
+        if (batteryNum == batteries.Length)
+        {
+            Battery[] newBatteries = new Battery[batteryNum * 2];
+            for (int i = 0; i < batteryNum; i++) newBatteries[i] = batteries[i];
+            batteries = newBatteries;
+        }
+
+        batteryId = batteryNum;
+        batteries[batteryNum++] = this;
+    }
+
     public Battery(float p)
     {
         Power = p;
         batteryId = batteryNum;
+        damaged = false;
 
         if (batteryNum == batteries.Length)
         {
@@ -37,6 +73,7 @@ public class Battery : MonoBehaviour
 
         batteries[batteryNum++] = this;
     }
+
     private static Battery DamagedBattery() {
         Battery dmg = new Battery(0f);
         dmg.damaged = true;
@@ -45,26 +82,11 @@ public class Battery : MonoBehaviour
 
     public static int GetBattery()
     {
-        return GetBattery(UnityEngine.Random.Range(0f, FullPower));
+        return (new Battery()).getId();
     }
 
     public static int GetBattery(float power) {
-        if (batteryNum == batteries.Length)
-        {
-            Battery[] newBatteries = new Battery[batteryNum * 2];
-            for (int i = 0; i < batteryNum; i++) newBatteries[i] = batteries[i];
-            batteries = newBatteries;
-        }
-
-        if (power <= DamagedChance)
-            batteries[batteryNum] = DamagedBattery();
-
-        else if (power < MinimumPower)
-            batteries[batteryNum] = new Battery((power / MinimumPower) * (FullPower - MinimumPower) + MinimumPower);
-
-        else batteries[batteryNum] = new Battery(power);
-
-        return batteryNum++;
+        return (new Battery(power)).getId();
     }
 
     public float Deplete()
@@ -73,22 +95,28 @@ public class Battery : MonoBehaviour
         return this.Power;
     }
 
+    public float RemainingPower() 
+    {
+        return this.Power;
+    }
+
     public int getId()
     {
         return this.batteryId;
     }
-
-    public int Pickup()
+    void OnTriggerEnter2D(Collider2D collider)
     {
-        if (this.damaged) 
+        if (collider.tag == "Player")
         {
-            Instantiate(Explosion, GetComponent<Rigidbody2D>().position, Quaternion.identity);
-            batteries[this.batteryId] = null;
-            Destroy(this);
-            return -1;
-        }
+            if (this.damaged)
+            {
+                Instantiate(AssetDatabase.LoadAssetAtPath("Assets/Prefabs/ExplosionPrefab.prefab", typeof(GameObject)), GetComponent<Rigidbody2D>().position, Quaternion.identity);
+                batteries[this.batteryId] = null;
+                Destroy(gameObject);
+            }
 
-        if (this.Power <= 0) return -1;
-        else return this.batteryId;
+            else if (this.Power <= 0) Destroy(gameObject);
+            else collider.GetComponent<PlayerValues>().InsertBattery(this);
+        }
     }
 }
