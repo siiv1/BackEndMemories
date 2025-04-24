@@ -2279,6 +2279,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   wallSlideSpeed: 2
+  wallJumpDampener: 0.995
   wallJumpPower: {x: 5, y: 10}
 --- !u!114 &241930621
 MonoBehaviour:
@@ -3129,7 +3130,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 54265
+    rgba: 3959477241
   m_fontColor: {r: 0.9748427, g: 0.82779557, b: 0, a: 0.92433727}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -3765,7 +3766,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!61 &746804168
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -19309,6 +19310,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movingPlatform: {fileID: 7418674238039773765, guid: f15e33342fb9f16449978efee598e216, type: 3}
+  battery: {fileID: 0}
 --- !u!50 &1849364433
 Rigidbody2D:
   serializedVersion: 4

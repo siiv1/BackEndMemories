@@ -50,6 +50,9 @@ public class PlayerMovement : MonoBehaviour
     public float wallJumpDampener = 0.995f;
     public Vector2 wallJumpPower = new Vector2(6f, 10f);
 
+    [Header("UI Control")]
+    public static bool isUIOpen = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -60,24 +63,28 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        GroundCheck();
-        Gravity();
-        WallSlide();
-        WallJump();
-        if (!isWallJumping)
+        //check if any UI open 
+        if (!isUIOpen)
         {
-            // Moving the character according to their speed
-            rb.velocity = new Vector2(horizontalMovement * moveSpeed, rb.velocity.y);
-            animator.SetFloat("magnitude", rb.velocity.magnitude);
-            Flip();
+            GroundCheck();
+            Gravity();
+            WallSlide();
+            WallJump();
+            if (!isWallJumping)
+            {
+                // Moving the character according to their speed
+                rb.velocity = new Vector2(horizontalMovement * moveSpeed, rb.velocity.y);
+                animator.SetFloat("magnitude", rb.velocity.magnitude);
+                Flip();
+            }
+            else
+            {
+                rb.velocity = new Vector2(rb.velocity.x * wallJumpDampener, rb.velocity.y); // reducing wall jump horizontal velocity
+            }
         }
-        else
-        {
-            rb.velocity = new Vector2(rb.velocity.x * wallJumpDampener, rb.velocity.y); // reducing wall jump horizontal velocity
-        }
+        else rb.velocity = Vector2.zero;
         animator.SetFloat("yVelocity", rb.velocity.y);
         animator.SetBool("isGrounded", isGrounded);
-        animator.SetBool("isWallSliding", isWallSliding);
     }
 
     private void Gravity()
@@ -151,32 +158,31 @@ public class PlayerMovement : MonoBehaviour
 
     private void WallSlide()
     {
-        //Checking for wallsliding and Calling the appropriate animation for right and left wallslides
-        bool isPressingIntoWall;
-
-        if (horizontalMovement > 0 && IsTouchingRightWall() && !isGrounded)
-        {
-            isPressingIntoWall = true;
-            animator.SetTrigger("rightSlide");
-        }
-        else if (horizontalMovement < 0 && IsTouchingLeftWall() && !isGrounded)
-        {
-            isPressingIntoWall = true;
-            animator.SetTrigger("leftSlide");
-        }
-        else
-        {
-            isPressingIntoWall = false;
-        }
+        bool isPressingIntoWall = (horizontalMovement > 0 && IsTouchingRightWall()) || (horizontalMovement < 0 && IsTouchingLeftWall());
+        bool rSlide = false;
+        bool lSlide = false;
 
         if (pv.mvmtMod > 0.25f && !isGrounded && isPressingIntoWall)
         {
             isWallSliding = true;
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, -wallSlideSpeed));
+            //Calling the appropriate animation for right and left wallslides
+            if (isPressingIntoWall && IsTouchingRightWall())
+            {
+                rSlide = true;
+                animator.SetBool("rightSlide", rSlide);
+            }
+            else if (isPressingIntoWall && IsTouchingLeftWall())
+            {
+                lSlide = true;
+                animator.SetBool("leftSlide", lSlide);
+            }
         }
-        else
+        else if (!isPressingIntoWall)
         {
             isWallSliding = false;
+            animator.SetBool("rightSlide", isWallSliding);
+            animator.SetBool("leftSlide", isWallSliding);
         }
     }
 
